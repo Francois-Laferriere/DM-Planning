@@ -6,14 +6,10 @@
 
 data(1..nbData).
 
-discrMeasure(tata).
-
 kmeansValue(3).
-%dist(euclidian).
 dist(euc).
 
-%%% TYPE
-struct( 1, data).
+
 
 %%%
 %%%  FLUENTS 
@@ -22,7 +18,7 @@ struct( 1, data).
 value(F,true) :- fluent(F).
 value(F,false) :- fluent(F).
 
-fluent(data(X)) :- data(X).  
+fluent(exists(data(X))) :- data(X).  
 
 %%%
 %%% PROPERTIES
@@ -34,7 +30,7 @@ value( struct, matrix).
 value( struct, patterns).
 value( struct, signatures).
 
-% does data have missing value
+% does data have missing values
 property( hasMissVal ).
 value( hasMissVal, true).
 value( hasMissVal, false).
@@ -43,6 +39,8 @@ value( hasMissVal, false).
 property( type ).
 value( type, bool).
 value( type, numeric).
+value( type, categorical).
+value( type, mix).
 
 % does data come from clustering
 property( getByClu ).
@@ -58,11 +56,13 @@ value( featClean, false).
 %%% HEREDITY
 %%%
 
+% define which properties will be transmitted to new data 
 heredit( getByClu ).
 heredit( hasColumnName ).
 heredit( hasTimeStamp ).
 heredit( hasMissVal ).
 heredit( featClean ).
+heredit( type ).
 
 %heredit(flag, toto).
 %property( flag ).   
@@ -70,14 +70,17 @@ heredit( featClean ).
 %value( flag, lulu).
 %init(flag, toto, 1).
 
-%:- heredit(X); default(X,_).
+%%% Default
+%default(type      , numeric).
+%default(hasMissVal, false  ).
+
 
 %%%
 %%%  INITIAL STATE 
 %%%
 
 init(X,false) :- fluent(X); not init(X,true).
-init(data(1), true).
+init(exists(data(1)), true).
 
 init(struct  , matrix , 1).
 init(type    , numeric, 1).
@@ -86,11 +89,6 @@ init(hasTimeStamp, true  , 1).
 init(hasColumnName, true  , 1).
 init(featClean, false  , 1).
 
-
-%%% Default
-default(type      , numeric).
-default(hasMissVal, false  ).
-%default(getByClu  , false  ).
 
 
 %%%
@@ -110,12 +108,12 @@ default(hasMissVal, false  ).
 %
 %%%% exist
 %
-%precond(kmeans(In, Dist, Out1, Out2), data(In) , true ) :- action(kmeans(In, Dist, Out1, Out2)). 
-%precond(kmeans(In, Dist, Out1, Out2), data(Out1), false) :- action(kmeans(In, Dist, Out1, Out2)). 
-%precond(kmeans(In, Dist, Out1, Out2), data(Out2), false) :- action(kmeans(In, Dist, Out1, Out2)). 
+%precond(kmeans(In, Dist, Out1, Out2), exists(data(In)) , true ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%precond(kmeans(In, Dist, Out1, Out2), exists(data(Out1)), false) :- action(kmeans(In, Dist, Out1, Out2)). 
+%precond(kmeans(In, Dist, Out1, Out2), exists(data(Out2)), false) :- action(kmeans(In, Dist, Out1, Out2)). 
 %
-%effect(kmeans(In, Dist, Out1, Out2), data(Out1), true) :- action(kmeans(In, Dist, Out1, Out2)). 
-%effect(kmeans(In, Dist, Out1, Out2), data(Out2), true) :- action(kmeans(In, Dist, Out1, Out2)). 
+%effect(kmeans(In, Dist, Out1, Out2), exists(data(Out1)), true) :- action(kmeans(In, Dist, Out1, Out2)). 
+%effect(kmeans(In, Dist, Out1, Out2), exists(data(Out2)), true) :- action(kmeans(In, Dist, Out1, Out2)). 
 %
 %generate(kmeans(In, Dist, Out1, Out2), In, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %generate(kmeans(In, Dist, Out1, Out2), In, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
@@ -142,16 +140,18 @@ default(hasMissVal, false  ).
 %%%      input2        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% an action with 2 inputs
+
 %action(input2(In1, In2, Out)) :- data(In1); data(In2); data(Out); In1<Out; In2<Out;
 %In1!=In2.
 %
 %same(input2(In1, In2,X), input2(In1, In2,Y)) :- action(input2(In1, In2, X)); action(input2(In1, In2, Y)).
 %
-%precond(input2(In1, In2, Out), data(In1), true ) :- action(input2(In1, In2, Out)). 
-%precond(input2(In1, In2, Out), data(In2), true ) :- action(input2(In1, In2, Out)). 
-%precond(input2(In1, In2, Out), data(Out), false) :- action(input2(In1, In2, Out)). 
+%precond(input2(In1, In2, Out), exists(data(In1)), true ) :- action(input2(In1, In2, Out)). 
+%precond(input2(In1, In2, Out), exists(data(In2)), true ) :- action(input2(In1, In2, Out)). 
+%precond(input2(In1, In2, Out), exists(data(Out)), false) :- action(input2(In1, In2, Out)). 
 %
-%effect(input2(In1, In2, Out), data(Out), true) :- action(input2(In1, In2, Out)). 
+%effect(input2(In1, In2, Out), exists(data(Out)), true) :- action(input2(In1, In2, Out)). 
 %
 %generate(input2(In1, In2, Out), In1, Out) :- action(input2(In1, In2, Out)). 
 %
@@ -171,10 +171,10 @@ action(featSelName(In, Out)) :- data(In); data(Out); In<Out.
 
 same(featSelName(In,Out1), featSelName(In,Out2)) :- action(featSelName(In, Out1));action(featSelName(In, Out2)).
 
-precond(featSelName(In, Out), data(In), true )  :- action(featSelName(In, Out)). 
-precond(featSelName(In, Out), data(Out), false) :- action(featSelName(In, Out)). 
+precond(featSelName(In, Out), exists(data(In)), true )  :- action(featSelName(In, Out)). 
+precond(featSelName(In, Out), exists(data(Out)), false) :- action(featSelName(In, Out)). 
 
-effect(featSelName(In, Out), data(Out), true) :- action(featSelName(In, Out)). 
+effect(featSelName(In, Out), exists(data(Out)), true) :- action(featSelName(In, Out)). 
 
 generate(featSelName(In, Out), In, Out) :- action(featSelName(In, Out)).
 
@@ -191,21 +191,21 @@ propEffect(featSelName(In, Out), featClean  , true, Out ) :- action(featSelName(
 action(fuzzyClu(In, Out1, Out2)) :- 
             data(In); data(Out1); data(Out2); In<Out1; Out2=Out1+1.
 
-
 same(fuzzyClu(In, X1, X2), fuzzyClu(In, Y1, Y2)) :-
             action(fuzzyClu(In, X1, X2)); action(fuzzyClu(In, Y1, Y2)).
 
 
-precond(fuzzyClu(In, Out1, Out2), data(In), true )  :- action(fuzzyClu(In, Out1, Out2)). 
-precond(fuzzyClu(In, Out1, Out2), data(Out1), false) :- action(fuzzyClu(In, Out1, Out2)). 
-precond(fuzzyClu(In, Out1, Out2), data(Out2), false) :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), exists(data(In)), true )  :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), exists(data(Out1)), false) :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), exists(data(Out2)), false) :- action(fuzzyClu(In, Out1, Out2)). 
 
-effect(fuzzyClu(In, Out1, Out2), data(Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
-effect(fuzzyClu(In, Out1, Out2), data(Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), exists(data(Out1)), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), exists(data(Out2)), true) :- action(fuzzyClu(In, Out1, Out2)). 
 
 generate(fuzzyClu(In, Out1, Out2), In, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
 
+propPrecond(fuzzyClu(In, Out1, Out2), struct  , matrix, In) :- action(fuzzyClu(In, Out1, Out2)). 
 propPrecond(fuzzyClu(In, Out1, Out2), getByClu  , false, In) :- action(fuzzyClu(In, Out1, Out2)). 
 
 propEffect(fuzzyClu(In, Out1, Out2), struct  , matrix, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
@@ -223,10 +223,10 @@ action(discretize(In, Out)) :- data(In); data(Out); In<Out.
 
 same(discretize(In,Out1), discretize(In,Out2)) :- action(discretize(In, Out1));action(discretize(In, Out2)).
 
-precond(discretize(In, Out), data(In) , true )  :- action(discretize(In, Out)). 
-precond(discretize(In, Out), data(Out), false) :- action(discretize(In, Out)). 
+precond(discretize(In, Out), exists(data(In)) , true )  :- action(discretize(In, Out)). 
+precond(discretize(In, Out), exists(data(Out)), false) :- action(discretize(In, Out)). 
 
-effect(discretize(In, Out), data(Out), true) :- action(discretize(In, Out)). 
+effect(discretize(In, Out), exists(data(Out)), true) :- action(discretize(In, Out)). 
 
 generate(discretize(In, Out), In, Out) :- action(discretize(In, Out)).
 
@@ -245,10 +245,10 @@ action(signatureMining(In, Out)) :- data(In); data(Out); In<Out.
 
 same(signatureMining(In,Out1), signatureMining(In,Out2)) :- action(signatureMining(In, Out1));action(signatureMining(In, Out2)).
 
-precond(signatureMining(In, Out), data(In) , true ) :- action(signatureMining(In, Out)). 
-precond(signatureMining(In, Out), data(Out), false) :- action(signatureMining(In, Out)). 
+precond(signatureMining(In, Out), exists(data(In)) , true ) :- action(signatureMining(In, Out)). 
+precond(signatureMining(In, Out), exists(data(Out)), false) :- action(signatureMining(In, Out)). 
 
-effect(signatureMining(In, Out), data(Out), true) :- action(signatureMining(In, Out)). 
+effect(signatureMining(In, Out),  exists(data(Out)), true) :- action(signatureMining(In, Out)). 
 
 generate(signatureMining(In, Out), In, Out) :- action(signatureMining(In, Out)).
 
