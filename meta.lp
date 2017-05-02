@@ -51,6 +51,9 @@ has(P,V,M) :- not has(P,W,M): value(P,W), W!=V; holds(exists(data(M)),true,_); d
 % Heredity
 gen(M,O,T) :- occ(A,T); generate(A,M,O).
 has(P,V,O) :- has(P,V,M); heredit(P); not has(P,W,O): value(P,W), W!=V; gen(M,O,_).
+holds(property(P,V,D2),V,T) :-
+
+holds(property(P,R,D2),V,T) :- holds(property(P,R,D1),V,T-1); heredit(P); not holds(property(P,R,D2),W,T): value(P,W), R!=G; gen(D1,D2,T).
 
 % There is conflict if a property is set to both inherited and by default
 %:- heredit(X); default(X,_).

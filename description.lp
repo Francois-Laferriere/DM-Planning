@@ -20,9 +20,13 @@ value(F,false) :- fluent(F).
 
 fluent(exists(data(X))) :- data(X).  
 
+fluent(property(P,V,D)) :- property(P,V,D).
+
 %%%
 %%% PROPERTIES
 %%%
+
+property(P,V,D) :- property(P), value(P,V), data(D).
 
 % data structure 
 property( struct ).
@@ -31,9 +35,9 @@ value( struct, patterns).
 value( struct, signatures).
 
 % does data have missing values
-property( hasMissVal ).
-value( hasMissVal, true).
-value( hasMissVal, false).
+property( hasNullVal ).
+value( hasNullVal, true).
+value( hasNullVal, false).
 
 % type of value in the data
 property( type ).
@@ -60,7 +64,7 @@ value( featClean, false).
 heredit( getByClu ).
 heredit( hasColumnName ).
 heredit( hasTimeStamp ).
-heredit( hasMissVal ).
+heredit( hasNullVal ).
 heredit( featClean ).
 heredit( type ).
 
@@ -72,7 +76,7 @@ heredit( type ).
 
 %%% Default
 %default(type      , numeric).
-%default(hasMissVal, false  ).
+%default(hasNullVal, false  ).
 
 
 %%%
@@ -122,7 +126,7 @@ init(featClean, false  , 1).
 %
 %propPrecond(kmeans(In, Dist, Out1, Out2), struct, matrix, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %propPrecond(kmeans(In, Dist, Out1, Out2), struct, matrix, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
-%propPrecond(kmeans(In, Dist, Out1, Out2), hasMissVal, false, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%propPrecond(kmeans(In, Dist, Out1, Out2), hasNullVal, false, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %propPrecond(kmeans(In, Dist, Out1, Out2), getByClu  , false, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %
 %propEffect(kmeans(In, Dist, Out1, Out2), struct, matrix, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
@@ -131,8 +135,8 @@ init(featClean, false  , 1).
 %propEffect(kmeans(In, Dist, Out1, Out2), getByClu, true, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %propEffect(kmeans(In, Dist, Out1, Out2), getByClu, true, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %
-%propEffect(kmeans(In, Dist, Out1, Out2), hasMissVal, false, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
-%propEffect(kmeans(In, Dist, Out1, Out2), hasMissVal, false, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%propEffect(kmeans(In, Dist, Out1, Out2), hasNullVal, false, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%propEffect(kmeans(In, Dist, Out1, Out2), hasNullVal, false, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 
 
 
