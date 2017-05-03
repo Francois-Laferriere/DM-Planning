@@ -35,25 +35,24 @@ holds(F,V,T) :- not holds(F,N,T): value(F,N), N!=V; holds(F,V,T-1); step(T).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Initialisation
-has(P,V,M) :- init(P,V,M).
+%has(P,V,M) :- init(P,V,M).
 
 %:- 1 { has(struc, V, M): value( struct, V) } 1; holds(exists(data(M)), true, T).
 
 % PROP precondition check
-:- occ(A,T), propPrecond(A,P,V,M), not has(P,V,M).
+%:- occ(A,T), propPrecond(A,P,V,M), not has(P,V,M).
 
 % PROP Direct effects
-has(P,V,M):- propEffect(A,P,V,M), occ(A,T).
+%has(P,V,M):- propEffect(A,P,V,M), occ(A,T).
 
 % Default properties 
-has(P,V,M) :- not has(P,W,M): value(P,W), W!=V; holds(exists(data(M)),true,_); default(P,V).
+%has(P,V,M) :- not has(P,W,M): value(P,W), W!=V; holds(exists(data(M)),true,_); default(P,V).
 
 % Heredity
 gen(M,O,T) :- occ(A,T); generate(A,M,O).
-has(P,V,O) :- has(P,V,M); heredit(P); not has(P,W,O): value(P,W), W!=V; gen(M,O,_).
-holds(property(P,V,D2),V,T) :-
+%has(P,V,O) :- has(P,V,M); heredit(P); not has(P,W,O): value(P,W), W!=V; gen(M,O,_).
 
-holds(property(P,R,D2),V,T) :- holds(property(P,R,D1),V,T-1); heredit(P); not holds(property(P,R,D2),W,T): value(P,W), R!=G; gen(D1,D2,T).
+holds(property(P,R,D2),V,T) :- holds(property(P,R,D1),V,T-1); heredit(P); not holds(property(P,G,D2),V,T): value(P,G), R!=G; gen(D1,D2,T).
 
 % There is conflict if a property is set to both inherited and by default
 %:- heredit(X); default(X,_).

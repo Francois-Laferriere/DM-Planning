@@ -86,12 +86,20 @@ heredit( type ).
 init(X,false) :- fluent(X); not init(X,true).
 init(exists(data(1)), true).
 
-init(struct  , matrix , 1).
-init(type    , numeric, 1).
-init(getByClu, false  , 1).
-init(hasTimeStamp, true  , 1).
-init(hasColumnName, true  , 1).
-init(featClean, false  , 1).
+%init(struct  , matrix , 1).
+%init(type    , numeric, 1).
+%init(getByClu, false  , 1).
+%init(hasTimeStamp, true  , 1).
+%init(hasColumnName, true  , 1).
+%init(featClean, false  , 1).
+
+init( property(struct       , matrix , 1), true).
+init( property(type         , numeric, 1), true).
+init( property(getByClu     , false  , 1), true).
+init( property(hasTimeStamp , true   , 1), true).
+init( property(hasColumnName, true   , 1), true).
+init( property(featClean    , false  , 1), true).
+
 
 
 
@@ -182,6 +190,12 @@ effect(featSelName(In, Out), exists(data(Out)), true) :- action(featSelName(In, 
 
 generate(featSelName(In, Out), In, Out) :- action(featSelName(In, Out)).
 
+precond(featSelName(In, Out), property(hasColumnName, true , In), true) :- action(featSelName(In,Out)).
+precond(featSelName(In, Out), property(featClean    , false, In), true) :- action(featSelName(In,Out)).
+
+effect(featSelName(In, Out), property(struct   , matrix, Out), true) :- action(featSelName(In, Out)). 
+effect(featSelName(In, Out), property(featClean, true  , Out), true) :- action(featSelName(In, Out)). 
+
 propPrecond(featSelName(In, Out), hasColumnName, true, In) :- action(featSelName(In,Out)).
 propPrecond(featSelName(In, Out), featClean, false, In) :- action(featSelName(In,Out)).
 
@@ -209,14 +223,14 @@ effect(fuzzyClu(In, Out1, Out2), exists(data(Out2)), true) :- action(fuzzyClu(In
 generate(fuzzyClu(In, Out1, Out2), In, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
 
-propPrecond(fuzzyClu(In, Out1, Out2), struct  , matrix, In) :- action(fuzzyClu(In, Out1, Out2)). 
-propPrecond(fuzzyClu(In, Out1, Out2), getByClu  , false, In) :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(struct  , matrix, In), true) :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(getByClu, false , In), true) :- action(fuzzyClu(In, Out1, Out2)). 
 
-propEffect(fuzzyClu(In, Out1, Out2), struct  , matrix, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
-propEffect(fuzzyClu(In, Out1, Out2), struct  , matrix, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(struct, matrix, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(struct, matrix, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
 
-propEffect(fuzzyClu(In, Out1, Out2), getByClu  , true, Out1) :- action(fuzzyClu(In, Out1, Out2)). 
-propEffect(fuzzyClu(In, Out1, Out2), getByClu  , true, Out2) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(getByClu, true, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(getByClu, true, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -234,11 +248,11 @@ effect(discretize(In, Out), exists(data(Out)), true) :- action(discretize(In, Ou
 
 generate(discretize(In, Out), In, Out) :- action(discretize(In, Out)).
 
-propPrecond(discretize(In, Out), struct, matrix , In) :- action(discretize(In, Out)).
-propPrecond(discretize(In, Out), type  , numeric, In) :- action(discretize(In, Out)).
+precond(discretize(In, Out), property(struct, matrix , In), true) :- action(discretize(In, Out)).
+precond(discretize(In, Out), property(type  , numeric, In), true) :- action(discretize(In, Out)).
 
-propEffect(discretize(In, Out), struct  , matrix, Out ) :- action(discretize(In, Out)). 
-propEffect(discretize(In, Out), type    , bool  , Out ) :- action(discretize(In, Out)). 
+effect(discretize(In, Out), property(struct, matrix, Out), true) :- action(discretize(In, Out)). 
+effect(discretize(In, Out), property(type  , bool  , Out), true) :- action(discretize(In, Out)). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -256,10 +270,10 @@ effect(signatureMining(In, Out),  exists(data(Out)), true) :- action(signatureMi
 
 generate(signatureMining(In, Out), In, Out) :- action(signatureMining(In, Out)).
 
-propPrecond(signatureMining(In, Out), type        , bool, In) :- action(signatureMining(In,Out)).
-propPrecond(signatureMining(In, Out), hasTimeStamp, true, In) :- action(signatureMining(In,Out)).
+precond(signatureMining(In, Out), property(type        , bool, In), true) :- action(signatureMining(In,Out)).
+precond(signatureMining(In, Out), property(hasTimeStamp, true, In), true) :- action(signatureMining(In,Out)).
 
-propEffect(signatureMining(In, Out) , struct, signature, Out) :- action(signatureMining(In,Out)).
+effect(signatureMining(In, Out) , property(struct, signature, Out), true) :- action(signatureMining(In,Out)).
 
 
 
