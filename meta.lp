@@ -34,25 +34,15 @@ holds(F,V,T) :- not holds(F,N,T): value(F,N), N!=V; holds(F,V,T-1); step(T).
 %%%        PROPERTIES                %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Initialisation
-%has(P,V,M) :- init(P,V,M).
-
-%:- 1 { has(struc, V, M): value( struct, V) } 1; holds(exists(data(M)), true, T).
-
-% PROP precondition check
-%:- occ(A,T), propPrecond(A,P,V,M), not has(P,V,M).
-
-% PROP Direct effects
-%has(P,V,M):- propEffect(A,P,V,M), occ(A,T).
-
 % Default properties 
 %has(P,V,M) :- not has(P,W,M): value(P,W), W!=V; holds(exists(data(M)),true,_); default(P,V).
 
 % Heredity
 gen(M,O,T) :- occ(A,T); generate(A,M,O).
-%has(P,V,O) :- has(P,V,M); heredit(P); not has(P,W,O): value(P,W), W!=V; gen(M,O,_).
 
-holds(property(P,R,D2),V,T) :- holds(property(P,R,D1),V,T-1); heredit(P); not holds(property(P,G,D2),V,T): value(P,G), R!=G; gen(D1,D2,T).
+holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
+
+erreur(multipleValuesForaFluent):- holds(F,V,T); holds(F,W,T); V!=W.
 
 % There is conflict if a property is set to both inherited and by default
 %:- heredit(X); default(X,_).
@@ -62,8 +52,6 @@ holds(property(P,R,D2),V,T) :- holds(property(P,R,D1),V,T-1); heredit(P); not ho
 same(A,B) :- same(B,A).
 :- occ(A,T), occ(B,Z), same(A,B), Z<T.
 %:- occ(A,T), occ(A,Z), Z<T.
-
-
 
 
 %%% SHOW SECTION
@@ -88,16 +76,26 @@ same(A,B) :- same(B,A).
 
 %flag(V,M) :- has(flag,V,M).
 %#show flag/2.
-clu(V,M) :- has(getByClu,V,M).
-%#show clu/2.
+%clu(V,M, T) :- holds(property(getByClu,M),V, T); holds(exists(data(M)), true,T).
+%#show clu/3.
 
 %holds(M,T) :- holds(exists(data(M)), true, T).
 %#show holds/2.
+%
+%bool(M,T):- holds(property(type,M), bool, T).
+%#show bool/2.
+%num(M,T):- holds(property(type,M), numeric, T).
+%#show num/2.
+%null(M,V,T):- holds(property(hasNullVal,M), V, T).
+%#show null/3.
+
+%prop(P,M,V,T):- holds(property(P,M),V,T).
+%#show prop/4.
 
 clement :- occ(featSelName(1,2),1); occ(fuzzyClu(2,3,4),2);
            occ(discretize(3,5), 3); occ(signatureMining(5,6), 4).
 %:- not clement.
-
+#show erreur/1.
 #show occ/2.
-%#project occ/2.
+#project occ/2.
 #show.

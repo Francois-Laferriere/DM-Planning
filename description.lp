@@ -2,7 +2,7 @@
 %%%  TYPES 
 %%%
 
-#const nbData = 15.
+#const nbData = 9.
 
 data(1..nbData).
 
@@ -15,46 +15,50 @@ dist(euc).
 %%%  FLUENTS 
 %%%
 
-value(F,true) :- fluent(F).
-value(F,false) :- fluent(F).
-
 fluent(exists(data(X))) :- data(X).  
+value(exists(data(X)),true)  :- fluent(exists(data(X))).
+value(exists(data(X)),false) :- fluent(exists(data(X))).
 
-fluent(property(P,V,D)) :- property(P,V,D).
+fluent(property(P,D)) :- property(P,D).
+
 
 %%%
 %%% PROPERTIES
 %%%
 
-property(P,V,D) :- property(P), value(P,V), data(D).
+property(P,M) :- property(P), data(M).
+value(property(P,M), V) :- propvalue(P,V); property(P); data(M).
+
+propvalue(P, unknown) :- property(P).
+propvalue(P, sensed ) :- property(P).
 
 % data structure 
 property( struct ).
-value( struct, matrix).
-value( struct, patterns).
-value( struct, signatures).
+propvalue( struct, matrix).
+propvalue( struct, patterns).
+propvalue( struct, signatures).
 
 % does data have missing values
 property( hasNullVal ).
-value( hasNullVal, true).
-value( hasNullVal, false).
+propvalue( hasNullVal, true).
+propvalue( hasNullVal, false).
 
-% type of value in the data
+%% type of value in the data
 property( type ).
-value( type, bool).
-value( type, numeric).
-value( type, categorical).
-value( type, mix).
+propvalue( type, bool).
+propvalue( type, numeric).
+propvalue( type, categorical).
+propvalue( type, mix).
 
 % does data come from clustering
 property( getByClu ).
-value( getByClu, true).
-value( getByClu, false).
+propvalue( getByClu, true).
+propvalue( getByClu, false).
 
 % does the feature have been selected 
 property( featClean ).
-value( featClean, true).
-value( featClean, false).
+propvalue( featClean, true).
+propvalue( featClean, false).
 
 %%%
 %%% HEREDITY
@@ -83,8 +87,9 @@ heredit( type ).
 %%%  INITIAL STATE 
 %%%
 
-init(X,false) :- fluent(X); not init(X,true).
+init(F,unknown) :- fluent(F); not init(F,V): value(F,V), V!=unknown.
 init(exists(data(1)), true).
+init(exists(data(X)), false) :- data(X); not init(exists(data(X)), true).
 
 %init(struct  , matrix , 1).
 %init(type    , numeric, 1).
@@ -93,12 +98,12 @@ init(exists(data(1)), true).
 %init(hasColumnName, true  , 1).
 %init(featClean, false  , 1).
 
-init( property(struct       , matrix , 1), true).
-init( property(type         , numeric, 1), true).
-init( property(getByClu     , false  , 1), true).
-init( property(hasTimeStamp , true   , 1), true).
-init( property(hasColumnName, true   , 1), true).
-init( property(featClean    , false  , 1), true).
+init( property(struct       , 1), matrix ).
+init( property(type         , 1), numeric).
+init( property(getByClu     , 1), false  ).
+init( property(hasTimeStamp , 1), true   ).
+init( property(hasColumnName, 1), true   ).
+init( property(featClean    , 1), false  ).
 
 
 
@@ -190,17 +195,13 @@ effect(featSelName(In, Out), exists(data(Out)), true) :- action(featSelName(In, 
 
 generate(featSelName(In, Out), In, Out) :- action(featSelName(In, Out)).
 
-precond(featSelName(In, Out), property(hasColumnName, true , In), true) :- action(featSelName(In,Out)).
-precond(featSelName(In, Out), property(featClean    , false, In), true) :- action(featSelName(In,Out)).
+precond(featSelName(In, Out), property(hasColumnName, In), true) :- action(featSelName(In,Out)).
+precond(featSelName(In, Out), property(featClean    , In), false) :- action(featSelName(In,Out)).
 
-effect(featSelName(In, Out), property(struct   , matrix, Out), true) :- action(featSelName(In, Out)). 
-effect(featSelName(In, Out), property(featClean, true  , Out), true) :- action(featSelName(In, Out)). 
+effect(featSelName(In, Out), property(struct   , Out), matrix) :- action(featSelName(In, Out)). 
+effect(featSelName(In, Out), property(featClean, Out), true) :- action(featSelName(In, Out)). 
 
-propPrecond(featSelName(In, Out), hasColumnName, true, In) :- action(featSelName(In,Out)).
-propPrecond(featSelName(In, Out), featClean, false, In) :- action(featSelName(In,Out)).
 
-propEffect(featSelName(In, Out), struct  , matrix, Out ) :- action(featSelName(In, Out)). 
-propEffect(featSelName(In, Out), featClean  , true, Out ) :- action(featSelName(In, Out)). 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   FUZZY CLU        %%%
@@ -223,14 +224,15 @@ effect(fuzzyClu(In, Out1, Out2), exists(data(Out2)), true) :- action(fuzzyClu(In
 generate(fuzzyClu(In, Out1, Out2), In, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
 
-precond(fuzzyClu(In, Out1, Out2), property(struct  , matrix, In), true) :- action(fuzzyClu(In, Out1, Out2)). 
-precond(fuzzyClu(In, Out1, Out2), property(getByClu, false , In), true) :- action(fuzzyClu(In, Out1, Out2)). 
+%precond(fuzzyClu(In, Out1, Out2), property(hasNullVal, In), false) :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(struct, In), matrix)    :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(getByClu, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
 
-effect(fuzzyClu(In, Out1, Out2), property(struct, matrix, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
-effect(fuzzyClu(In, Out1, Out2), property(struct, matrix, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(struct, Out1), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(struct, Out2), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
 
-effect(fuzzyClu(In, Out1, Out2), property(getByClu, true, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
-effect(fuzzyClu(In, Out1, Out2), property(getByClu, true, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(getByClu, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(getByClu, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -248,11 +250,11 @@ effect(discretize(In, Out), exists(data(Out)), true) :- action(discretize(In, Ou
 
 generate(discretize(In, Out), In, Out) :- action(discretize(In, Out)).
 
-precond(discretize(In, Out), property(struct, matrix , In), true) :- action(discretize(In, Out)).
-precond(discretize(In, Out), property(type  , numeric, In), true) :- action(discretize(In, Out)).
+precond(discretize(In, Out), property(struct, In), matrix ) :- action(discretize(In, Out)).
+precond(discretize(In, Out), property(type  , In), numeric) :- action(discretize(In, Out)).
 
-effect(discretize(In, Out), property(struct, matrix, Out), true) :- action(discretize(In, Out)). 
-effect(discretize(In, Out), property(type  , bool  , Out), true) :- action(discretize(In, Out)). 
+effect(discretize(In, Out), property(struct, Out), matrix) :- action(discretize(In, Out)). 
+effect(discretize(In, Out), property(type  , Out), bool  ) :- action(discretize(In, Out)). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -270,10 +272,66 @@ effect(signatureMining(In, Out),  exists(data(Out)), true) :- action(signatureMi
 
 generate(signatureMining(In, Out), In, Out) :- action(signatureMining(In, Out)).
 
-precond(signatureMining(In, Out), property(type        , bool, In), true) :- action(signatureMining(In,Out)).
-precond(signatureMining(In, Out), property(hasTimeStamp, true, In), true) :- action(signatureMining(In,Out)).
+precond(signatureMining(In, Out), property(type, In), bool) :- action(signatureMining(In,Out)).
+precond(signatureMining(In, Out), property(hasTimeStamp, In), true) :- action(signatureMining(In,Out)).
 
-effect(signatureMining(In, Out) , property(struct, signature, Out), true) :- action(signatureMining(In,Out)).
+effect(signatureMining(In, Out) , property(struct, Out), signature) :- action(signatureMining(In,Out)).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   SENSE NULL VAL   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%action(senseNullVal(In,Out)) :- data(In); data(Out); In<Out.
+%
+%same(senseNullVal(In,Out1), senseNullVal(In,Out2)) :- action(senseNullVal(In,Out1));action(senseNullVal(In, Out2)).
+%
+%precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
+%precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
+%
+%effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
+%generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
+%
+%precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
+%
+%effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%   REMOVE NULL VAL  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%action(removeNullVal(In,Out)) :- data(In); data(Out); In<Out.
+%
+%same(removeNullVal(In,Out1), removeNullVal(In,Out2)) :- action(removeNullVal(In,Out1));action(removeNullVal(In, Out2)).
+%
+%precond(removeNullVal(In, Out), exists(data(In)) , true ) :- action(removeNullVal(In, Out)). 
+%precond(removeNullVal(In, Out), exists(data(Out)), false) :- action(removeNullVal(In, Out)). 
+%effect( removeNullVal(In, Out), exists(data(Out)), true ) :- action(removeNullVal(In, Out)). 
+%generate(removeNullVal(In, Out), In, Out) :- action(removeNullVal(In, Out)).
+%
+%precond(removeNullVal(In, Out), property(hasNullVal, In), true) :- action(removeNullVal(In, Out)). 
+%
+%effect(removeNullVal(In, Out), property(hasNullVal, Out), false) :- action(removeNullVal(In, Out)). 
+%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%    ASSERSTION      %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%action(getNullVal(In,Out)) :- data(In); data(Out); In<Out.
+%
+%same(getNullVal(In,Out1), getNullVal(In,Out2)) :- action(getNullVal(In,Out1));action(getNullVal(In, Out2)).
+%
+%precond(getNullVal(In, Out), exists(data(In)) , true ) :- action(getNullVal(In, Out)). 
+%precond(getNullVal(In, Out), exists(data(Out)), false) :- action(getNullVal(In, Out)). 
+%effect( getNullVal(In, Out), exists(data(Out)), true ) :- action(getNullVal(In, Out)). 
+%generate(getNullVal(In, Out), In, Out) :- action(getNullVal(In, Out)).
+%
+%precond(getNullVal(In, Out), property(hasNullVal, In), sensed) :- action(getNullVal(In, Out)). 
+%
+%effect(getNullVal(In, Out), property(hasNullVal, Out), false) :- action(getNullVal(In, Out)). 
 
 
 
