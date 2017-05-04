@@ -31,9 +31,9 @@ value( struct, patterns).
 value( struct, signatures).
 
 % does data have missing values
-property( hasMissVal ).
-value( hasMissVal, true).
-value( hasMissVal, false).
+property( hasNullVal ).
+value( hasNullVal, true).
+value( hasNullVal, false).
 
 % type of value in the data
 property( type ).
@@ -60,7 +60,7 @@ value( featClean, false).
 heredit( getByClu ).
 heredit( hasColumnName ).
 heredit( hasTimeStamp ).
-heredit( hasMissVal ).
+heredit( hasNullVal ).
 heredit( featClean ).
 heredit( type ).
 
@@ -72,7 +72,7 @@ heredit( type ).
 
 %%% Default
 %default(type      , numeric).
-%default(hasMissVal, false  ).
+%default(hasNullVal, false  ).
 
 
 %%%
@@ -122,7 +122,7 @@ init(featClean, false  , 1).
 %
 %propPrecond(kmeans(In, Dist, Out1, Out2), struct, matrix, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %propPrecond(kmeans(In, Dist, Out1, Out2), struct, matrix, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
-%propPrecond(kmeans(In, Dist, Out1, Out2), hasMissVal, false, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%propPrecond(kmeans(In, Dist, Out1, Out2), hasNullVal, false, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %propPrecond(kmeans(In, Dist, Out1, Out2), getByClu  , false, In ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %
 %propEffect(kmeans(In, Dist, Out1, Out2), struct, matrix, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
@@ -131,8 +131,8 @@ init(featClean, false  , 1).
 %propEffect(kmeans(In, Dist, Out1, Out2), getByClu, true, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %propEffect(kmeans(In, Dist, Out1, Out2), getByClu, true, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 %
-%propEffect(kmeans(In, Dist, Out1, Out2), hasMissVal, false, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
-%propEffect(kmeans(In, Dist, Out1, Out2), hasMissVal, false, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%propEffect(kmeans(In, Dist, Out1, Out2), hasNullVal, false, Out1 ) :- action(kmeans(In, Dist, Out1, Out2)). 
+%propEffect(kmeans(In, Dist, Out1, Out2), hasNullVal, false, Out2 ) :- action(kmeans(In, Dist, Out1, Out2)). 
 
 
 
@@ -258,4 +258,56 @@ propPrecond(signatureMining(In, Out), hasTimeStamp, true, In) :- action(signatur
 propEffect(signatureMining(In, Out) , struct, signature, Out) :- action(signatureMining(In,Out)).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   SENSE NULL VAL   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+action(senseNullVal(In,Out)) :- data(In); data(Out); In<Out.
+
+same(senseNullVal(In,Out1), senseNullVal(In,Out2)) :- action(senseNullVal(In,Out1));action(senseNullVal(In, Out2)).
+
+precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
+precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
+
+effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
+generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
+
+propPrecond(senseNullVal(In, Out), hasNullVal, unknown, In) :- action(senseNullVal(In, Out)). 
+
+propEffect(senseNullVal(In, Out), hasNullVal, sensed, Out) :- action(senseNullVal(In,Out)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   REMOVE NULL VAL  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(removeNullVal(In,Out)) :- data(In); data(Out); In<Out.
+
+same(removeNullVal(In,Out1), removeNullVal(In,Out2)) :- action(removeNullVal(In,Out1));action(removeNullVal(In, Out2)).
+
+precond(removeNullVal(In, Out), exists(data(In)) , true ) :- action(removeNullVal(In, Out)). 
+precond(removeNullVal(In, Out), exists(data(Out)), false) :- action(removeNullVal(In, Out)). 
+effect( removeNullVal(In, Out), exists(data(Out)), true ) :- action(removeNullVal(In, Out)). 
+generate(removeNullVal(In, Out), In, Out) :- action(removeNullVal(In, Out)).
+
+propPrecond(removeNullVal(In, Out), hasNullVal, true, In) :- action(removeNullVal(In, Out)). 
+
+propEffect(removeNullVal(In, Out), hasNullVal, false, Out) :- action(removeNullVal(In, Out)). 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%    ASSERSTION      %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(getNullVal(In,Out)) :- data(In); data(Out); In<Out.
+
+same(getNullVal(In,Out1), getNullVal(In,Out2)) :- action(getNullVal(In,Out1));action(getNullVal(In, Out2)).
+
+precond(getNullVal(In, Out), exists(data(In)) , true ) :- action(getNullVal(In, Out)). 
+precond(getNullVal(In, Out), exists(data(Out)), false) :- action(getNullVal(In, Out)). 
+effect( getNullVal(In, Out), exists(data(Out)), true ) :- action(getNullVal(In, Out)). 
+generate(getNullVal(In, Out), In, Out) :- action(getNullVal(In, Out)).
+
+propPrecond(getNullVal(In, Out), hasNullVal, sensed, In) :- action(getNullVal(In, Out)). 
+
+propEffect(getNullVal(In, Out), hasNullVal, false, Out) :- action(getNullVal(In, Out)). 
