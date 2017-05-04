@@ -86,16 +86,18 @@ same(A,B) :- same(B,A).
 
 %flag(V,M) :- has(flag,V,M).
 %#show flag/2.
-clu(V,M) :- has(getByClu,V,M).
-%#show clu/2.
+%miss(V,M) :- has(hasNullVal,V,M).
+%#show miss/2.
 
 %holds(M,T) :- holds(exists(data(M)), true, T).
 %#show holds/2.
 
-clement :- occ(featSelName(1,2),1); occ(fuzzyClu(2,3,4),2);
-           occ(discretize(3,5), 3); occ(signatureMining(5,6), 4).
+%clement :- occ(featSelName(1,2),1); occ(fuzzyClu(2,3,4),2); occ(discretize(3,5), 3); occ(signatureMining(5,6), 4).
+%clement :- occ(featSelName(1,2),1); occ(senseNullVal(2,3),2); occ(getNullVal(3,4),3); occ(fuzzyClu(4,5,6),4); occ(discretize(5,7), 5); occ(signatureMining(7,8), 6).
 %:- not clement.
 
 #show occ/2.
 %#project occ/2.
+%has(V):-has(hasNullVal,V,4).
+%#show has/1.
 #show.

@@ -24,6 +24,9 @@ fluent(exists(data(X))) :- data(X).
 %%% PROPERTIES
 %%%
 
+value(P, unknown) :- property(P).
+value(P, sensed)  :- property(P).
+
 % data structure 
 property( struct ).
 value( struct, matrix).
@@ -57,6 +60,7 @@ value( featClean, false).
 %%%
 
 % define which properties will be transmitted to new data 
+heredit( struct ).
 heredit( getByClu ).
 heredit( hasColumnName ).
 heredit( hasTimeStamp ).
