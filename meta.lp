@@ -40,12 +40,33 @@ holds(F,V,T) :- not holds(F,N,T): value(F,N), N!=V; holds(F,V,T-1); step(T).
 % Heredity
 gen(M,O,T) :- occ(A,T); generate(A,M,O).
 
-holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
+%holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
+here(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
+
+holds(property(P,D2),V,T) :- here(property(P,D2),V,T).
 
 erreur(multipleValuesForaFluent):- holds(F,V,T); holds(F,W,T); V!=W.
 
-% There is conflict if a property is set to both inherited and by default
-%:- heredit(X); default(X,_).
+
+% Default
+
+holds(property(P,M), unknown, T) :- def(property(P,M), unknown, T).
+
+def(property(P,M), unknown, T) :- holds(exists(data(M)), true, T);
+                                    property(P,M);
+                                    not holds(property(P,M),V,T): propvalue(P,V), V!=unknown; 
+                                    not gen(_,M,_).
+holds(property(P,M), unknown, T) :- holds(exists(data(M)), true, T);
+                                    property(P,M);
+                                    not holds(property(P,M),V,T): propvalue(P,V), V!=unknown; 
+                                    not heredit(P).
+
+erreur(mat(M)):- holds(exists(data(M)), true, T);
+                                    property(P,M);
+                                    not holds(property(P,M),V,T): propvalue(P,V), V!=unknown; 
+                                    not gen(_,M,_).
+
+
 
 
 % Disable the execution of the same action twice (on the same data)
@@ -56,41 +77,18 @@ same(A,B) :- same(B,A).
 
 %%% SHOW SECTION
 
-%#show father(X,Y,T) : has(father(X,Y),true,T).
-%#show miss(X,T) : has(hasMissVal(X),false,T).
 
-%#show father(X,Y, V) : has(father(X,Y),V,T).
-%#show fath(X,T) : has(father(X), true,T).
-%#show kw(F,T): has(kw(F),true,T).
-%#show precond(C,V): pprecond(kmeans(1,euclidian,3),C,V).
 
-%#show score(X,V,T): has(score(X),V,T).
-%#show pat(X,T) : has(holds(patterns(X)), true, T).
-%#show holds(M,T): holds(exists(data(M)), true, T).
-%#show col(M,T): has(hasColName(M), true, T).
-%#show num(M,T): has(isNumeric(M), true, T).
-%#show bin(M,T): has(isBinary(M), true, T).
-%#show timeStamp(M,T): has(hasTimeStamp(M), true, T).
 
-%#show nbAction(N) : #sum {1,A:action(A)} = N.
+%gen(M,T) :- holds(exists(data(M)), true, T); gen(_,M,_).
+#show gen/3.
+#show def/3.
+#show here/3.
 
-%flag(V,M) :- has(flag,V,M).
-%#show flag/2.
-%clu(V,M, T) :- holds(property(getByClu,M),V, T); holds(exists(data(M)), true,T).
-%#show clu/3.
-
-%holds(M,T) :- holds(exists(data(M)), true, T).
-%#show holds/2.
-%
 %bool(M,T):- holds(property(type,M), bool, T).
 %#show bool/2.
-%num(M,T):- holds(property(type,M), numeric, T).
-%#show num/2.
 %null(M,V,T):- holds(property(hasNullVal,M), V, T).
 %#show null/3.
-
-%prop(P,M,V,T):- holds(property(P,M),V,T).
-%#show prop/4.
 
 clement :- occ(featSelName(1,2),1); occ(fuzzyClu(2,3,4),2);
            occ(discretize(3,5), 3); occ(signatureMining(5,6), 4).
@@ -98,4 +96,3 @@ clement :- occ(featSelName(1,2),1); occ(fuzzyClu(2,3,4),2);
 #show erreur/1.
 #show occ/2.
 #project occ/2.
-#show.

@@ -65,6 +65,7 @@ propvalue( featClean, false).
 %%%
 
 % define which properties will be transmitted to new data 
+heredit( struct ).
 heredit( getByClu ).
 heredit( hasColumnName ).
 heredit( hasTimeStamp ).
@@ -79,8 +80,7 @@ heredit( type ).
 %init(flag, toto, 1).
 
 %%% Default
-%default(type      , numeric).
-%default(hasNullVal, false  ).
+
 
 
 %%%
@@ -104,7 +104,7 @@ init( property(getByClu     , 1), false  ).
 init( property(hasTimeStamp , 1), true   ).
 init( property(hasColumnName, 1), true   ).
 init( property(featClean    , 1), false  ).
-init( property(hasNullVal   , 1), unknown).
+%init( property(hasNullVal   , 1), unknown).
 
 
 
