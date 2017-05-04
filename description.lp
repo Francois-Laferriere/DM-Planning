@@ -88,6 +88,7 @@ init(getByClu, false  , 1).
 init(hasTimeStamp, true  , 1).
 init(hasColumnName, true  , 1).
 init(featClean, false  , 1).
+init(hasNullVal, unknown  , 1).
 
 
 
@@ -205,8 +206,10 @@ effect(fuzzyClu(In, Out1, Out2), exists(data(Out2)), true) :- action(fuzzyClu(In
 generate(fuzzyClu(In, Out1, Out2), In, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
 
-propPrecond(fuzzyClu(In, Out1, Out2), struct  , matrix, In) :- action(fuzzyClu(In, Out1, Out2)). 
-propPrecond(fuzzyClu(In, Out1, Out2), getByClu  , false, In) :- action(fuzzyClu(In, Out1, Out2)). 
+propPrecond(fuzzyClu(In, Out1, Out2), struct    , matrix, In) :- action(fuzzyClu(In, Out1, Out2)). 
+propPrecond(fuzzyClu(In, Out1, Out2), getByClu  , false , In) :- action(fuzzyClu(In, Out1, Out2)). 
+
+propPrecond(fuzzyClu(In, Out1, Out2), hasNullVal, false , In) :- action(fuzzyClu(In, Out1, Out2)). 
 
 propEffect(fuzzyClu(In, Out1, Out2), struct  , matrix, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 propEffect(fuzzyClu(In, Out1, Out2), struct  , matrix, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
