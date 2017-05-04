@@ -87,7 +87,7 @@ heredit( type ).
 %%%  INITIAL STATE 
 %%%
 
-init(F,unknown) :- fluent(F); not init(F,V): value(F,V), V!=unknown.
+%init(F,unknown) :- fluent(F); not init(F,V): value(F,V), V!=unknown.
 init(exists(data(1)), true).
 init(exists(data(X)), false) :- data(X); not init(exists(data(X)), true).
 
@@ -104,6 +104,7 @@ init( property(getByClu     , 1), false  ).
 init( property(hasTimeStamp , 1), true   ).
 init( property(hasColumnName, 1), true   ).
 init( property(featClean    , 1), false  ).
+init( property(hasNullVal   , 1), unknown).
 
 
 
@@ -228,6 +229,9 @@ generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)
 precond(fuzzyClu(In, Out1, Out2), property(struct, In), matrix)    :- action(fuzzyClu(In, Out1, Out2)). 
 precond(fuzzyClu(In, Out1, Out2), property(getByClu, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
 
+precond(fuzzyClu(In, Out1, Out2), property(hasNullVal, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
+
+
 effect(fuzzyClu(In, Out1, Out2), property(struct, Out1), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
 effect(fuzzyClu(In, Out1, Out2), property(struct, Out2), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
 
@@ -283,55 +287,55 @@ effect(signatureMining(In, Out) , property(struct, Out), signature) :- action(si
 %%%   SENSE NULL VAL   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%action(senseNullVal(In,Out)) :- data(In); data(Out); In<Out.
-%
-%same(senseNullVal(In,Out1), senseNullVal(In,Out2)) :- action(senseNullVal(In,Out1));action(senseNullVal(In, Out2)).
-%
-%precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
-%precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
-%
-%effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
-%generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
-%
-%precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
-%
-%effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%   REMOVE NULL VAL  %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%action(removeNullVal(In,Out)) :- data(In); data(Out); In<Out.
-%
-%same(removeNullVal(In,Out1), removeNullVal(In,Out2)) :- action(removeNullVal(In,Out1));action(removeNullVal(In, Out2)).
-%
-%precond(removeNullVal(In, Out), exists(data(In)) , true ) :- action(removeNullVal(In, Out)). 
-%precond(removeNullVal(In, Out), exists(data(Out)), false) :- action(removeNullVal(In, Out)). 
-%effect( removeNullVal(In, Out), exists(data(Out)), true ) :- action(removeNullVal(In, Out)). 
-%generate(removeNullVal(In, Out), In, Out) :- action(removeNullVal(In, Out)).
-%
-%precond(removeNullVal(In, Out), property(hasNullVal, In), true) :- action(removeNullVal(In, Out)). 
-%
-%effect(removeNullVal(In, Out), property(hasNullVal, Out), false) :- action(removeNullVal(In, Out)). 
-%
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%    ASSERSTION      %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%action(getNullVal(In,Out)) :- data(In); data(Out); In<Out.
-%
-%same(getNullVal(In,Out1), getNullVal(In,Out2)) :- action(getNullVal(In,Out1));action(getNullVal(In, Out2)).
-%
-%precond(getNullVal(In, Out), exists(data(In)) , true ) :- action(getNullVal(In, Out)). 
-%precond(getNullVal(In, Out), exists(data(Out)), false) :- action(getNullVal(In, Out)). 
-%effect( getNullVal(In, Out), exists(data(Out)), true ) :- action(getNullVal(In, Out)). 
-%generate(getNullVal(In, Out), In, Out) :- action(getNullVal(In, Out)).
-%
-%precond(getNullVal(In, Out), property(hasNullVal, In), sensed) :- action(getNullVal(In, Out)). 
-%
-%effect(getNullVal(In, Out), property(hasNullVal, Out), false) :- action(getNullVal(In, Out)). 
+action(senseNullVal(In,Out)) :- data(In); data(Out); In<Out.
+
+same(senseNullVal(In,Out1), senseNullVal(In,Out2)) :- action(senseNullVal(In,Out1));action(senseNullVal(In, Out2)).
+
+precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
+precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
+
+effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
+generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
+
+precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
+
+effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   REMOVE NULL VAL  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(removeNullVal(In,Out)) :- data(In); data(Out); In<Out.
+
+same(removeNullVal(In,Out1), removeNullVal(In,Out2)) :- action(removeNullVal(In,Out1));action(removeNullVal(In, Out2)).
+
+precond(removeNullVal(In, Out), exists(data(In)) , true ) :- action(removeNullVal(In, Out)). 
+precond(removeNullVal(In, Out), exists(data(Out)), false) :- action(removeNullVal(In, Out)). 
+effect( removeNullVal(In, Out), exists(data(Out)), true ) :- action(removeNullVal(In, Out)). 
+generate(removeNullVal(In, Out), In, Out) :- action(removeNullVal(In, Out)).
+
+precond(removeNullVal(In, Out), property(hasNullVal, In), true) :- action(removeNullVal(In, Out)). 
+
+effect(removeNullVal(In, Out), property(hasNullVal, Out), false) :- action(removeNullVal(In, Out)). 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%    ASSERSTION      %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(getNullVal(In,Out)) :- data(In); data(Out); In<Out.
+
+same(getNullVal(In,Out1), getNullVal(In,Out2)) :- action(getNullVal(In,Out1));action(getNullVal(In, Out2)).
+
+precond(getNullVal(In, Out), exists(data(In)) , true ) :- action(getNullVal(In, Out)). 
+precond(getNullVal(In, Out), exists(data(Out)), false) :- action(getNullVal(In, Out)). 
+effect( getNullVal(In, Out), exists(data(Out)), true ) :- action(getNullVal(In, Out)). 
+generate(getNullVal(In, Out), In, Out) :- action(getNullVal(In, Out)).
+
+precond(getNullVal(In, Out), property(hasNullVal, In), sensed) :- action(getNullVal(In, Out)). 
+
+effect(getNullVal(In, Out), property(hasNullVal, Out), false) :- action(getNullVal(In, Out)). 
 
 
 
