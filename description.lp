@@ -2,7 +2,7 @@
 %%%  TYPES 
 %%%
 
-#const nbData = 9.
+#const nbData = 11.
 
 data(1..nbData).
 
@@ -32,11 +32,12 @@ value(property(P,M), V) :- propvalue(P,V); property(P); data(M).
 propvalue(P, unknown) :- property(P).
 propvalue(P, sensed ) :- property(P).
 
+
 % data structure 
 property( struct ).
 propvalue( struct, matrix).
-propvalue( struct, patterns).
-propvalue( struct, signatures).
+propvalue( struct, pattern).
+propvalue( struct, signature).
 
 % does data have missing values
 property( hasNullVal ).
@@ -160,8 +161,7 @@ init( property(featClean    , 1), false  ).
 
 %% an action with 2 inputs
 
-%action(input2(In1, In2, Out)) :- data(In1); data(In2); data(Out); In1<Out; In2<Out;
-%In1!=In2.
+%action(input2(In1, In2, Out)) :- data(In1); data(In2); data(Out); In1<Out; In2<Out; In1!=In2.
 %
 %same(input2(In1, In2,X), input2(In1, In2,Y)) :- action(input2(In1, In2, X)); action(input2(In1, In2, Y)).
 %
@@ -173,11 +173,11 @@ init( property(featClean    , 1), false  ).
 %
 %generate(input2(In1, In2, Out), In1, Out) :- action(input2(In1, In2, Out)). 
 %
-%propPrecond(input2(In1, In2, Out), struct, matrix, In1 ) :- action(input2(In1, In2, Out)). 
-%propPrecond(input2(In1, In2, Out), struct, matrix, In2 ) :- action(input2(In1, In2, Out)). 
+%precond(input2(In1, In2, Out), property(struct, In1), matrix ) :- action(input2(In1, In2, Out)). 
+%precond(input2(In1, In2, Out), property(struct, In2), matrix ) :- action(input2(In1, In2, Out)). 
 %
-%propEffect(input2(In1, In2, Out), struct  , matrix, Out ) :- action(input2(In1, In2, Out)). 
-%%propEffect(input2(In1, In2, Out), getByClu, false , Out ) :- action(input2(In1, In2, Out)). 
+%effect(input2(In1, In2, Out), property( struct, Out), matrix ) :- action(input2(In1, In2, Out)).
+%effect(input2(In1, In2, Out), property( getByClu, Out), false) :- action(input2(In1, In2, Out)). 
 
 
 
@@ -191,7 +191,6 @@ same(featSelName(In,Out1), featSelName(In,Out2)) :- action(featSelName(In, Out1)
 
 precond(featSelName(In, Out), exists(data(In)), true )  :- action(featSelName(In, Out)). 
 precond(featSelName(In, Out), exists(data(Out)), false) :- action(featSelName(In, Out)). 
-
 effect(featSelName(In, Out), exists(data(Out)), true) :- action(featSelName(In, Out)). 
 
 generate(featSelName(In, Out), In, Out) :- action(featSelName(In, Out)).
@@ -319,7 +318,6 @@ precond(removeNullVal(In, Out), property(hasNullVal, In), true) :- action(remove
 effect(removeNullVal(In, Out), property(hasNullVal, Out), false) :- action(removeNullVal(In, Out)). 
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%    ASSERSTION      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -336,6 +334,4 @@ generate(getNullVal(In, Out), In, Out) :- action(getNullVal(In, Out)).
 precond(getNullVal(In, Out), property(hasNullVal, In), sensed) :- action(getNullVal(In, Out)). 
 
 effect(getNullVal(In, Out), property(hasNullVal, Out), false) :- action(getNullVal(In, Out)). 
-
-
 
