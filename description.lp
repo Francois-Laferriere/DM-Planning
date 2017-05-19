@@ -1,37 +1,26 @@
 %%%
 %%%  TYPES 
 %%%
-
 #const nbData = 11.
-
 data(1..nbData).
-
 kmeansValue(3).
 dist(euc).
-
-
 
 %%%
 %%%  FLUENTS 
 %%%
-
 fluent(exists(data(X))) :- data(X).  
+fluent(property(P,D)) :- property(P,D).
 value(exists(data(X)),true)  :- fluent(exists(data(X))).
 value(exists(data(X)),false) :- fluent(exists(data(X))).
-
-fluent(property(P,D)) :- property(P,D).
-
 
 %%%
 %%% PROPERTIES
 %%%
-
 property(P,M) :- property(P), data(M).
 value(property(P,M), V) :- propvalue(P,V); property(P); data(M).
-
 propvalue(P, unknown) :- property(P).
 propvalue(P, sensed ) :- property(P).
-
 
 % data structure 
 property( struct ).
@@ -74,30 +63,12 @@ heredit( hasNullVal ).
 heredit( featClean ).
 heredit( type ).
 
-%heredit(flag, toto).
-%property( flag ).   
-%value( flag, toto).
-%value( flag, lulu).
-%init(flag, toto, 1).
-
-%%% Default
-
-
-
 %%%
 %%%  INITIAL STATE 
 %%%
 
-%init(F,unknown) :- fluent(F); not init(F,V): value(F,V), V!=unknown.
 init(exists(data(1)), true).
 init(exists(data(X)), false) :- data(X); not init(exists(data(X)), true).
-
-%init(struct  , matrix , 1).
-%init(type    , numeric, 1).
-%init(getByClu, false  , 1).
-%init(hasTimeStamp, true  , 1).
-%init(hasColumnName, true  , 1).
-%init(featClean, false  , 1).
 
 init( property(struct       , 1), matrix ).
 init( property(type         , 1), numeric).
@@ -106,9 +77,6 @@ init( property(hasTimeStamp , 1), true   ).
 init( property(hasColumnName, 1), true   ).
 init( property(featClean    , 1), false  ).
 %init( property(hasNullVal   , 1), unknown).
-
-
-
 
 %%%
 %%%   ACTION DESCRIPTION
@@ -156,28 +124,23 @@ init( property(featClean    , 1), false  ).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%      input2        %%%
+%%% REMOVE STOP WORDS  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% an action with 2 inputs
+action(removeStopWords(In, Out)) :- data(In); data(Out); In<Out.
 
-%action(input2(In1, In2, Out)) :- data(In1); data(In2); data(Out); In1<Out; In2<Out; In1!=In2.
-%
-%same(input2(In1, In2,X), input2(In1, In2,Y)) :- action(input2(In1, In2, X)); action(input2(In1, In2, Y)).
-%
-%precond(input2(In1, In2, Out), exists(data(In1)), true ) :- action(input2(In1, In2, Out)). 
-%precond(input2(In1, In2, Out), exists(data(In2)), true ) :- action(input2(In1, In2, Out)). 
-%precond(input2(In1, In2, Out), exists(data(Out)), false) :- action(input2(In1, In2, Out)). 
-%
-%effect(input2(In1, In2, Out), exists(data(Out)), true) :- action(input2(In1, In2, Out)). 
-%
-%generate(input2(In1, In2, Out), In1, Out) :- action(input2(In1, In2, Out)). 
-%
-%precond(input2(In1, In2, Out), property(struct, In1), matrix ) :- action(input2(In1, In2, Out)). 
-%precond(input2(In1, In2, Out), property(struct, In2), matrix ) :- action(input2(In1, In2, Out)). 
-%
-%effect(input2(In1, In2, Out), property( struct, Out), matrix ) :- action(input2(In1, In2, Out)).
-%effect(input2(In1, In2, Out), property( getByClu, Out), false) :- action(input2(In1, In2, Out)). 
+same(removeStopWords(In,Out1), removeStopWords(In,Out2)) :- action(removeStopWords(In, Out1));action(removeStopWords(In, Out2)).
+
+precond(removeStopWords(In, Out), exists(data(In)), true )  :- action(removeStopWords(In, Out)). 
+precond(removeStopWords(In, Out), exists(data(Out)), false) :- action(removeStopWords(In, Out)). 
+effect(removeStopWords(In, Out), exists(data(Out)), true) :- action(removeStopWords(In, Out)). 
+
+generate(removeStopWords(In, Out), In, Out) :- action(removeStopWords(In, Out)).
+
+precond(removeStopWords(In, Out), property(hasColumnName, In), true) :- action(removeStopWords(In,Out)).
+
+effect(removeStopWords(In, Out), property(struct   , Out), matrix) :- action(removeStopWords(In, Out)). 
+
 
 
 
@@ -185,21 +148,21 @@ init( property(featClean    , 1), false  ).
 %%%   FEATSELNAME      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-action(featSelName(In, Out)) :- data(In); data(Out); In<Out.
+action(groupByStemp(In, Out)) :- data(In); data(Out); In<Out.
 
-same(featSelName(In,Out1), featSelName(In,Out2)) :- action(featSelName(In, Out1));action(featSelName(In, Out2)).
+same(groupByStemp(In,Out1), groupByStemp(In,Out2)) :- action(groupByStemp(In, Out1));action(groupByStemp(In, Out2)).
 
-precond(featSelName(In, Out), exists(data(In)), true )  :- action(featSelName(In, Out)). 
-precond(featSelName(In, Out), exists(data(Out)), false) :- action(featSelName(In, Out)). 
-effect(featSelName(In, Out), exists(data(Out)), true) :- action(featSelName(In, Out)). 
+precond(groupByStemp(In, Out), exists(data(In)), true )  :- action(groupByStemp(In, Out)). 
+precond(groupByStemp(In, Out), exists(data(Out)), false) :- action(groupByStemp(In, Out)). 
+effect(groupByStemp(In, Out), exists(data(Out)), true) :- action(groupByStemp(In, Out)). 
 
-generate(featSelName(In, Out), In, Out) :- action(featSelName(In, Out)).
+generate(groupByStemp(In, Out), In, Out) :- action(groupByStemp(In, Out)).
 
-precond(featSelName(In, Out), property(hasColumnName, In), true) :- action(featSelName(In,Out)).
-precond(featSelName(In, Out), property(featClean    , In), false) :- action(featSelName(In,Out)).
+precond(groupByStemp(In, Out), property(hasColumnName, In), true) :- action(groupByStemp(In,Out)).
+precond(groupByStemp(In, Out), property(featClean    , In), false) :- action(groupByStemp(In,Out)).
 
-effect(featSelName(In, Out), property(struct   , Out), matrix) :- action(featSelName(In, Out)). 
-effect(featSelName(In, Out), property(featClean, Out), true) :- action(featSelName(In, Out)). 
+effect(groupByStemp(In, Out), property(struct   , Out), matrix) :- action(groupByStemp(In, Out)). 
+effect(groupByStemp(In, Out), property(featClean, Out), true) :- action(groupByStemp(In, Out)). 
 
 
 
@@ -224,11 +187,8 @@ effect(fuzzyClu(In, Out1, Out2), exists(data(Out2)), true) :- action(fuzzyClu(In
 generate(fuzzyClu(In, Out1, Out2), In, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
 
-%precond(fuzzyClu(In, Out1, Out2), property(hasNullVal, In), false) :- action(fuzzyClu(In, Out1, Out2)). 
 precond(fuzzyClu(In, Out1, Out2), property(struct, In), matrix)    :- action(fuzzyClu(In, Out1, Out2)). 
 precond(fuzzyClu(In, Out1, Out2), property(getByClu, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
-
-precond(fuzzyClu(In, Out1, Out2), property(hasNullVal, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
 
 
 effect(fuzzyClu(In, Out1, Out2), property(struct, Out1), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
@@ -319,7 +279,7 @@ effect(removeNullVal(In, Out), property(hasNullVal, Out), false) :- action(remov
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%    ASSERSTION      %%%
+%%%  ASSER GETNULLVAL  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 action(getNullVal(In,Out)) :- data(In); data(Out); In<Out.
@@ -334,4 +294,31 @@ generate(getNullVal(In, Out), In, Out) :- action(getNullVal(In, Out)).
 precond(getNullVal(In, Out), property(hasNullVal, In), sensed) :- action(getNullVal(In, Out)). 
 
 effect(getNullVal(In, Out), property(hasNullVal, Out), false) :- action(getNullVal(In, Out)). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  SPLIT CLASS       %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(splitClass(In, Out1, Out2)) :- 
+            data(In); data(Out1); data(Out2); In<Out1; Out2=Out1+1.
+
+same(splitClass(In, X1, X2), splitClass(In, Y1, Y2)) :-
+            action(splitClass(In, X1, X2)); action(splitClass(In, Y1, Y2)).
+
+
+precond(splitClass(In, Out1, Out2), exists(data(In)), true )  :- action(splitClass(In, Out1, Out2)). 
+precond(splitClass(In, Out1, Out2), exists(data(Out1)), false) :- action(splitClass(In, Out1, Out2)). 
+precond(splitClass(In, Out1, Out2), exists(data(Out2)), false) :- action(splitClass(In, Out1, Out2)). 
+
+effect(splitClass(In, Out1, Out2), exists(data(Out1)), true) :- action(splitClass(In, Out1, Out2)). 
+effect(splitClass(In, Out1, Out2), exists(data(Out2)), true) :- action(splitClass(In, Out1, Out2)). 
+
+generate(splitClass(In, Out1, Out2), In, Out1 ) :- action(splitClass(In, Out1, Out2)). 
+generate(splitClass(In, Out1, Out2), In, Out2 ) :- action(splitClass(In, Out1, Out2)). 
+
+precond(splitClass(In, Out1, Out2), property(struct, In), matrix)    :- action(splitClass(In, Out1, Out2)). 
+
+
+effect(splitClass(In, Out1, Out2), property(struct, Out1), matrix) :- action(splitClass(In, Out1, Out2)). 
+effect(splitClass(In, Out1, Out2), property(struct, Out2), matrix) :- action(splitClass(In, Out1, Out2)). 
 

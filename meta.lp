@@ -41,6 +41,23 @@ holds(F,V,T) :- not holds(F,N,T): value(F,N), N!=V; holds(F,V,T-1); step(T).
 gen(M,O,T) :- occ(A,T); generate(A,M,O).
 
 holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
+
+
+
+% Disable the execution of the same action twice (on the same data)
+same(A,B) :- same(B,A).
+:- occ(A,T), occ(B,Z), same(A,B), Z<T.
+%:- occ(A,T), occ(A,Z), Z<T.
+
+
+%%%
+%%%  Test
+%%%
+
+:- gen(M,O1,T); gen(M,O2,K); O1!=O2; T!=K.
+
+
+
 %here(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
 %holds(property(P,D2),V,T) :- here(property(P,D2),V,T).
 
@@ -67,11 +84,6 @@ holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(
 
 
 
-
-% Disable the execution of the same action twice (on the same data)
-same(A,B) :- same(B,A).
-:- occ(A,T), occ(B,Z), same(A,B), Z<T.
-%:- occ(A,T), occ(A,Z), Z<T.
 
 
 %%% SHOW SECTION
