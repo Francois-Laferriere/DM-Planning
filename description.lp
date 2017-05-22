@@ -78,6 +78,8 @@ init( property(hasColumnName, 1), true   ).
 init( property(featClean    , 1), false  ).
 %init( property(hasNullVal   , 1), unknown).
 
+%init(P,unknown):- fluent(P); not init(P,V); V!=unknown; value(P,V).
+
 %%%
 %%%   ACTION DESCRIPTION
 %%%
@@ -189,6 +191,7 @@ generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)
 
 precond(fuzzyClu(In, Out1, Out2), property(struct, In), matrix)    :- action(fuzzyClu(In, Out1, Out2)). 
 precond(fuzzyClu(In, Out1, Out2), property(getByClu, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(type, In), numerical)   :- action(fuzzyClu(In, Out1, Out2)). 
 
 
 effect(fuzzyClu(In, Out1, Out2), property(struct, Out1), matrix) :- action(fuzzyClu(In, Out1, Out2)). 

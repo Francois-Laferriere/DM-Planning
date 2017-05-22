@@ -34,14 +34,14 @@ holds(F,V,T) :- not holds(F,N,T): value(F,N), N!=V; holds(F,V,T-1); step(T).
 %%%        PROPERTIES                %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Default properties 
-%has(P,V,M) :- not has(P,W,M): value(P,W), W!=V; holds(exists(data(M)),true,_); default(P,V).
+changes(A,property(P,D),T):- occ(A,T); effect(A,property(P,D),_).
 
 % Heredity
-gen(M,O,T) :- occ(A,T); generate(A,M,O).
 
-holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
+%holds(property(P,D2),V,T) :- holds(property(P,D1),V,T-1); heredit(P); not holds(property(P,D2),W,T): propvalue(P,W), V!=W; gen(D1,D2,T).
 
+
+holds(property(P,D2),V,T) :- occ(A,T); generate(A,D1,D2); holds(property(P,D1),V,T-1); heredit(P); not changes(A,property(P,D2), T). 
 
 
 % Disable the execution of the same action twice (on the same data)
@@ -54,7 +54,14 @@ same(A,B) :- same(B,A).
 %%%  Test
 %%%
 
+gen(M,O,T) :- occ(A,T); generate(A,M,O).
 :- gen(M,O1,T); gen(M,O2,K); O1!=O2; T!=K.
+
+des(A,B):- gen(A,B,T).
+des(A,C):- des(A,B); gen(B,C,T).
+
+%#show changes/3.
+%#show des/2.
 
 
 
@@ -107,4 +114,4 @@ same(A,B) :- same(B,A).
 %:- not clement.
 %#show erreur/4.
 #show occ/2.
-#project occ/2.
+%#project occ/2.
