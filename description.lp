@@ -50,6 +50,12 @@ property( featClean ).
 propvalue( featClean, true).
 propvalue( featClean, false).
 
+% does the matrix have class 
+property( hasClass ).
+propvalue( hasClass, true).
+propvalue( hasClass, false).
+
+
 %%%
 %%% HEREDITY
 %%%
@@ -62,6 +68,7 @@ heredit( hasTimeStamp ).
 heredit( hasNullVal ).
 heredit( featClean ).
 heredit( type ).
+heredit( hasClass ).
 
 %%%
 %%%  INITIAL STATE 
@@ -76,6 +83,7 @@ init( property(getByClu     , 1), false  ).
 init( property(hasTimeStamp , 1), true   ).
 init( property(hasColumnName, 1), true   ).
 init( property(featClean    , 1), false  ).
+init( property(hasClass     , 1), true   ).
 %init( property(hasNullVal   , 1), unknown).
 
 %init(P,unknown):- fluent(P); not init(P,V); V!=unknown; value(P,V).
@@ -147,7 +155,7 @@ effect(removeStopWords(In, Out), property(struct   , Out), matrix) :- action(rem
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%   FEATSELNAME      %%%
+%%%   groupByStemp     %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 action(groupByStemp(In, Out)) :- data(In); data(Out); In<Out.
@@ -249,9 +257,23 @@ effect(signatureMining(In, Out) , property(struct, Out), signature) :- action(si
 %%%   SENSE NULL VAL   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-action(senseNullVal(In,Out)) :- data(In); data(Out); In<Out.
+%action(senseNullVal(In,Out)) :- data(In); data(Out); In<Out.
+%
+%same(senseNullVal(In,Out1), senseNullVal(In,Out2)) :- action(senseNullVal(In,Out1));action(senseNullVal(In, Out2)).
+%
+%precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
+%precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
+%
+%effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
+%generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
+%
+%precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
+%
+%effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
 
-same(senseNullVal(In,Out1), senseNullVal(In,Out2)) :- action(senseNullVal(In,Out1));action(senseNullVal(In, Out2)).
+action(senseNullVal(In)) :- data(In).
+
+same(senseNullVal(In), senseNullVal(In) :- action(senseNullVal(In);action(senseNullVal(In, Out2)).
 
 precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
 precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
@@ -262,6 +284,7 @@ generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
 precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
 
 effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   REMOVE NULL VAL  %%%
@@ -320,8 +343,12 @@ generate(splitClass(In, Out1, Out2), In, Out1 ) :- action(splitClass(In, Out1, O
 generate(splitClass(In, Out1, Out2), In, Out2 ) :- action(splitClass(In, Out1, Out2)). 
 
 precond(splitClass(In, Out1, Out2), property(struct, In), matrix)    :- action(splitClass(In, Out1, Out2)). 
+precond(splitClass(In, Out1, Out2), property(hasClass, In), true)    :- action(splitClass(In, Out1, Out2)). 
 
 
 effect(splitClass(In, Out1, Out2), property(struct, Out1), matrix) :- action(splitClass(In, Out1, Out2)). 
 effect(splitClass(In, Out1, Out2), property(struct, Out2), matrix) :- action(splitClass(In, Out1, Out2)). 
+
+effect(splitClass(In, Out1, Out2), property(hasClass, Out1), false) :- action(splitClass(In, Out1, Out2)). 
+effect(splitClass(In, Out1, Out2), property(hasClass, Out2), false) :- action(splitClass(In, Out1, Out2)). 
 
