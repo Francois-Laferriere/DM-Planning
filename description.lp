@@ -51,9 +51,9 @@ propvalue( featClean, true).
 propvalue( featClean, false).
 
 % does the matrix have class 
-property( hasClass ).
-propvalue( hasClass, true).
-propvalue( hasClass, false).
+property( labelized ).
+propvalue( labelized, true).
+propvalue( labelized, false).
 
 
 %%%
@@ -68,7 +68,7 @@ heredit( hasTimeStamp ).
 heredit( hasNullVal ).
 heredit( featClean ).
 heredit( type ).
-heredit( hasClass ).
+heredit( labelized ).
 
 %%%
 %%%  INITIAL STATE 
@@ -83,10 +83,13 @@ init( property(getByClu     , 1), false  ).
 init( property(hasTimeStamp , 1), true   ).
 init( property(hasColumnName, 1), true   ).
 init( property(featClean    , 1), false  ).
-init( property(hasClass     , 1), true   ).
+init( property(labelized     , 1), true   ).
 %init( property(hasNullVal   , 1), unknown).
 
-%init(P,unknown):- fluent(P); not init(P,V); V!=unknown; value(P,V).
+% by default properties are unknown
+init(property(P,D),unknown):- property(P); data(D); not init(property(P,D),V): V!=unknown,propvalue(P,V).
+
+
 
 %%%
 %%%   ACTION DESCRIPTION
@@ -230,6 +233,27 @@ precond(discretize(In, Out), property(type  , In), numeric) :- action(discretize
 effect(discretize(In, Out), property(struct, Out), matrix) :- action(discretize(In, Out)). 
 effect(discretize(In, Out), property(type  , Out), bool  ) :- action(discretize(In, Out)). 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  SIGNATURE MINING  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(topKitem(In, Out)) :- data(In); data(Out); In<Out.
+
+same(topKitem(In,Out1), topKitem(In,Out2)) :- action(topKitem(In, Out1));action(topKitem(In, Out2)).
+
+precond(topKitem(In, Out), exists(data(In)) , true ) :- action(topKitem(In, Out)). 
+precond(topKitem(In, Out), exists(data(Out)), false) :- action(topKitem(In, Out)). 
+
+effect(topKitem(In, Out),  exists(data(Out)), true) :- action(topKitem(In, Out)). 
+
+generate(topKitem(In, Out), In, Out) :- action(topKitem(In, Out)).
+
+precond(topKitem(In, Out), property(type, In), bool) :- action(topKitem(In,Out)).
+precond(topKitem(In, Out), property(hasTimeStamp, In), true) :- action(topKitem(In,Out)).
+
+effect(topKitem(In, Out) , property(struct, Out), signature) :- action(topKitem(In,Out)).
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%  SIGNATURE MINING  %%%
@@ -264,7 +288,7 @@ effect(signatureMining(In, Out) , property(struct, Out), signature) :- action(si
 %precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
 %precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
 %
-%effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
+%effect(senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
 %generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
 %
 %precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
@@ -272,18 +296,10 @@ effect(signatureMining(In, Out) , property(struct, Out), signature) :- action(si
 %effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
 
 action(senseNullVal(In)) :- data(In).
+precond(senseNullVal(In), exists(data(In)) , true )          :- action(senseNullVal(In)). 
+precond(senseNullVal(In), property(hasNullVal, In), unknown) :- action(senseNullVal(In)). 
+effect( senseNullVal(In), property(hasNullVal, In), sensed)  :- action(senseNullVal(In)).
 
-same(senseNullVal(In), senseNullVal(In) :- action(senseNullVal(In);action(senseNullVal(In, Out2)).
-
-precond(senseNullVal(In, Out), exists(data(In)) , true )  :- action(senseNullVal(In, Out)). 
-precond(senseNullVal(In, Out), exists(data(Out)), false) :- action(senseNullVal(In, Out)). 
-
-effect( senseNullVal(In, Out), exists(data(Out)), true ) :- action(senseNullVal(In, Out)). 
-generate(senseNullVal(In, Out), In, Out) :- action(senseNullVal(In, Out)).
-
-precond(senseNullVal(In, Out), property(hasNullVal, In), unknown) :- action(senseNullVal(In, Out)). 
-
-effect(senseNullVal(In, Out), property(hasNullVal, Out), sensed) :- action(senseNullVal(In,Out)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -343,12 +359,11 @@ generate(splitClass(In, Out1, Out2), In, Out1 ) :- action(splitClass(In, Out1, O
 generate(splitClass(In, Out1, Out2), In, Out2 ) :- action(splitClass(In, Out1, Out2)). 
 
 precond(splitClass(In, Out1, Out2), property(struct, In), matrix)    :- action(splitClass(In, Out1, Out2)). 
-precond(splitClass(In, Out1, Out2), property(hasClass, In), true)    :- action(splitClass(In, Out1, Out2)). 
+precond(splitClass(In, Out1, Out2), property(labelized, In), true)    :- action(splitClass(In, Out1, Out2)). 
 
 
 effect(splitClass(In, Out1, Out2), property(struct, Out1), matrix) :- action(splitClass(In, Out1, Out2)). 
 effect(splitClass(In, Out1, Out2), property(struct, Out2), matrix) :- action(splitClass(In, Out1, Out2)). 
 
-effect(splitClass(In, Out1, Out2), property(hasClass, Out1), false) :- action(splitClass(In, Out1, Out2)). 
-effect(splitClass(In, Out1, Out2), property(hasClass, Out2), false) :- action(splitClass(In, Out1, Out2)). 
-
+effect(splitClass(In, Out1, Out2), property(labelized, Out1), false) :- action(splitClass(In, Out1, Out2)). 
+effect(splitClass(In, Out1, Out2), property(labelized, Out2), false) :- action(splitClass(In, Out1, Out2)). 
