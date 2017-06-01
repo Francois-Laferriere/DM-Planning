@@ -55,6 +55,18 @@ property( labelized ).
 propvalue( labelized, true).
 propvalue( labelized, false).
 
+% does the matrix have class 
+property( hasTimeStamp ).
+propvalue( hasTimeStamp, true).
+propvalue( hasTimeStamp, false).
+
+% does the matrix have class 
+property(  colAreWords ).
+propvalue( colAreWords, true).
+propvalue( colAreWords, false).
+
+
+
 
 %%%
 %%% HEREDITY
@@ -63,12 +75,22 @@ propvalue( labelized, false).
 % define which properties will be transmitted to new data 
 heredit( struct ).
 heredit( getByClu ).
-heredit( hasColumnName ).
+heredit( colAreWords ).
 heredit( hasTimeStamp ).
 heredit( hasNullVal ).
 heredit( featClean ).
 heredit( type ).
 heredit( labelized ).
+
+default( struct, unknown ).
+default( getByClu, false).
+default( colAreWords, unknown ).
+default( hasTimeStamp, unknown ).
+default( hasNullVal, unknown ).
+default( featClean, false ).
+default( type, unknown ).
+default( labelized, unknown ).
+
 
 %%%
 %%%  INITIAL STATE 
@@ -81,14 +103,14 @@ init( property(struct       , 1), matrix ).
 init( property(type         , 1), numeric).
 init( property(getByClu     , 1), false  ).
 init( property(hasTimeStamp , 1), true   ).
-init( property(hasColumnName, 1), true   ).
+init( property(colAreWords, 1), true   ).
 init( property(featClean    , 1), false  ).
 init( property(labelized     , 1), true   ).
-%init( property(hasNullVal   , 1), unknown).
+init( property(hasNullVal   , 1), false).
 
 % by default properties are unknown
-init(property(P,D),unknown):- property(P); data(D); not init(property(P,D),V): V!=unknown,propvalue(P,V).
 
+init(property(P,M),D):- default(P,D); property(P); data(M); not init(property(P,M),V): V!=D, propvalue(P,V).
 
 
 %%%
@@ -150,7 +172,8 @@ effect(removeStopWords(In, Out), exists(data(Out)), true) :- action(removeStopWo
 
 generate(removeStopWords(In, Out), In, Out) :- action(removeStopWords(In, Out)).
 
-precond(removeStopWords(In, Out), property(hasColumnName, In), true) :- action(removeStopWords(In,Out)).
+precond(removeStopWords(In, Out), property(colAreWords, In), true) :- action(removeStopWords(In,Out)).
+precond(removeStopWords(In, Out), property(type, In), numeric) :- action(removeStopWords(In,Out)).
 
 effect(removeStopWords(In, Out), property(struct   , Out), matrix) :- action(removeStopWords(In, Out)). 
 
@@ -171,8 +194,9 @@ effect(groupByStemp(In, Out), exists(data(Out)), true) :- action(groupByStemp(In
 
 generate(groupByStemp(In, Out), In, Out) :- action(groupByStemp(In, Out)).
 
-precond(groupByStemp(In, Out), property(hasColumnName, In), true) :- action(groupByStemp(In,Out)).
-precond(groupByStemp(In, Out), property(featClean    , In), false) :- action(groupByStemp(In,Out)).
+precond(groupByStemp(In, Out), property(type, In), numeric) :- action(groupByStemp(In,Out)).
+precond(groupByStemp(In, Out), property(colAreWords, In), true) :- action(groupByStemp(In,Out)).
+%precond(groupByStemp(In, Out), property(featClean    , In), false) :- action(groupByStemp(In,Out)).
 
 effect(groupByStemp(In, Out), property(struct   , Out), matrix) :- action(groupByStemp(In, Out)). 
 effect(groupByStemp(In, Out), property(featClean, Out), true) :- action(groupByStemp(In, Out)). 
@@ -183,8 +207,7 @@ effect(groupByStemp(In, Out), property(featClean, Out), true) :- action(groupByS
 %%%   FUZZY CLU        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-action(fuzzyClu(In, Out1, Out2)) :- 
-            data(In); data(Out1); data(Out2); In<Out1; Out2=Out1+1.
+action(fuzzyClu(In, Out1, Out2)) :- data(In); data(Out1); data(Out2); In<Out1; Out2=Out1+1.
 
 same(fuzzyClu(In, X1, X2), fuzzyClu(In, Y1, Y2)) :-
             action(fuzzyClu(In, X1, X2)); action(fuzzyClu(In, Y1, Y2)).
@@ -200,16 +223,23 @@ effect(fuzzyClu(In, Out1, Out2), exists(data(Out2)), true) :- action(fuzzyClu(In
 generate(fuzzyClu(In, Out1, Out2), In, Out1 ) :- action(fuzzyClu(In, Out1, Out2)). 
 generate(fuzzyClu(In, Out1, Out2), In, Out2 ) :- action(fuzzyClu(In, Out1, Out2)). 
 
+precond(fuzzyClu(In, Out1, Out2), property(hasNullVal, In), false)    :- action(fuzzyClu(In, Out1, Out2)). 
 precond(fuzzyClu(In, Out1, Out2), property(struct, In), matrix)    :- action(fuzzyClu(In, Out1, Out2)). 
-precond(fuzzyClu(In, Out1, Out2), property(getByClu, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
-precond(fuzzyClu(In, Out1, Out2), property(type, In), numerical)   :- action(fuzzyClu(In, Out1, Out2)). 
+%precond(fuzzyClu(In, Out1, Out2), property(getByClu, In), false)   :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(type, In), numeric)   :- action(fuzzyClu(In, Out1, Out2)). 
+precond(fuzzyClu(In, Out1, Out2), property(colAreWords, In), true) :- action(fuzzyClu(In,Out1,Out2)).
 
 
 effect(fuzzyClu(In, Out1, Out2), property(struct, Out1), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
 effect(fuzzyClu(In, Out1, Out2), property(struct, Out2), matrix) :- action(fuzzyClu(In, Out1, Out2)). 
 
-effect(fuzzyClu(In, Out1, Out2), property(getByClu, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
-effect(fuzzyClu(In, Out1, Out2), property(getByClu, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
+
+%effect(fuzzyClu(In, Out1, Out2), property(getByClu, Out1), true) :- action(fuzzyClu(In, Out1, Out2)). 
+%effect(fuzzyClu(In, Out1, Out2), property(getByClu, Out2), true) :- action(fuzzyClu(In, Out1, Out2)). 
+
+effect(fuzzyClu(In, Out1, Out2), property(colAreWords, Out1), false) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(labelized, Out2), false) :- action(fuzzyClu(In, Out1, Out2)). 
+effect(fuzzyClu(In, Out1, Out2), property(hasTimeStamp, Out2), false) :- action(fuzzyClu(In, Out1, Out2)). 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -227,6 +257,7 @@ effect(discretize(In, Out), exists(data(Out)), true) :- action(discretize(In, Ou
 
 generate(discretize(In, Out), In, Out) :- action(discretize(In, Out)).
 
+precond(discretize(In, Out), property(hasNullVal, In), false ) :- action(discretize(In, Out)).
 precond(discretize(In, Out), property(struct, In), matrix ) :- action(discretize(In, Out)).
 precond(discretize(In, Out), property(type  , In), numeric) :- action(discretize(In, Out)).
 
@@ -237,21 +268,21 @@ effect(discretize(In, Out), property(type  , Out), bool  ) :- action(discretize(
 %%%  SIGNATURE MINING  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-action(topKitem(In, Out)) :- data(In); data(Out); In<Out.
+%action(topKitem(In, Out)) :- data(In); data(Out); In<Out.
 
-same(topKitem(In,Out1), topKitem(In,Out2)) :- action(topKitem(In, Out1));action(topKitem(In, Out2)).
-
-precond(topKitem(In, Out), exists(data(In)) , true ) :- action(topKitem(In, Out)). 
-precond(topKitem(In, Out), exists(data(Out)), false) :- action(topKitem(In, Out)). 
-
-effect(topKitem(In, Out),  exists(data(Out)), true) :- action(topKitem(In, Out)). 
-
-generate(topKitem(In, Out), In, Out) :- action(topKitem(In, Out)).
-
-precond(topKitem(In, Out), property(type, In), bool) :- action(topKitem(In,Out)).
-precond(topKitem(In, Out), property(hasTimeStamp, In), true) :- action(topKitem(In,Out)).
-
-effect(topKitem(In, Out) , property(struct, Out), signature) :- action(topKitem(In,Out)).
+%same(topKitem(In,Out1), topKitem(In,Out2)) :- action(topKitem(In, Out1));action(topKitem(In, Out2)).
+%
+%precond(topKitem(In, Out), exists(data(In)) , true ) :- action(topKitem(In, Out)). 
+%precond(topKitem(In, Out), exists(data(Out)), false) :- action(topKitem(In, Out)). 
+%
+%effect(topKitem(In, Out),  exists(data(Out)), true) :- action(topKitem(In, Out)). 
+%
+%generate(topKitem(In, Out), In, Out) :- action(topKitem(In, Out)).
+%
+%precond(topKitem(In, Out), property(type, In), bool) :- action(topKitem(In,Out)).
+%precond(topKitem(In, Out), property(hasTimeStamp, In), true) :- action(topKitem(In,Out)).
+%
+%effect(topKitem(In, Out) , property(struct, Out), signature) :- action(topKitem(In,Out)).
 
 
 
@@ -367,3 +398,45 @@ effect(splitClass(In, Out1, Out2), property(struct, Out2), matrix) :- action(spl
 
 effect(splitClass(In, Out1, Out2), property(labelized, Out1), false) :- action(splitClass(In, Out1, Out2)). 
 effect(splitClass(In, Out1, Out2), property(labelized, Out2), false) :- action(splitClass(In, Out1, Out2)). 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%    KNOWLEDGE       %%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action(none).
+occ(none, T):- occ(none,T-1); step(T).
+
+spl:- occ(splitClass(_,A,B),_); occ(signatureMining(A,_),_); occ(signatureMining(B,_),_).
+:- not spl.
+
+:- occ(signatureMining(A,_),_); occ(signatureMining(B,_),_); des(A,B).
+
+:- gen(A,_,T1); gen(B,_,T2); A<B; T2<T1.
+
+:- occ(splitClass(A,X,Y), _); occ(discretize(X,_),_); occ(discretize(Y,_),_).
+:- occ(splitClass(A,X,Y), _); occ(removeStopWords(X,_),_); occ(removeStopWords(Y,_),_).
+
+:- occ(splitClass(A,X,Y),T); not gen(X,S,F): data(S), step(F), F<T+2; not gen(Y,C,I): data(C),
+step(I), I<T+2.
+
+knowledge(text).
+sw:- occ(removeStopWords(_,_),_); knowledge(text).
+:- not sw.
+
+:- occ(removeStopWords(A,_),_); occ(removeStopWords(B,_),_); des(A,B). 
+%:- occ(groupByStem(A,_),_); occ(groupByStem(B,_),_); des(A,B). 
+
+:- not ok.
+ok :- occ(signatureMining(A,B),T).
+ 
+stem :- occ(groupByStemp(_,_),_). 
+%:- not stem.
+
+:- occ(groupByStemp(D,X),T); not occ(removeStopWords(O,Y), G): data(O), data(Y), G<T,
+des(O,D), step(G).
+
+:- #count{T: gen(A,_,T)} = C; C>1; data(A).
+occtwice(A):- #count{T: gen(A,_,T)} = C; C=2; data(A).
+:- #count{A: occtwice(A)}>2.

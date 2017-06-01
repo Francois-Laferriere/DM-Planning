@@ -55,10 +55,10 @@ same(A,B) :- same(B,A).
 %%%
 
 gen(M,O,T) :- occ(A,T); generate(A,M,O).
-:- gen(M,O1,T); gen(M,O2,K); O1!=O2; T!=K.
+%:- gen(M,O1,T); gen(M,O2,K); O1!=O2; T!=K.
 
 des(A,B):- gen(A,B,T).
-des(A,C):- des(A,B); gen(B,C,T).
+des(A,C):- des(A,B); des(B,C).
 
 %#show changes/3.
 %#show des/2.
