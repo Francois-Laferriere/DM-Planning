@@ -417,6 +417,7 @@ spl:- occ(splitClass(_,A,B),_); occ(signatureMining(A,_),_); occ(signatureMining
 
 :- occ(splitClass(A,X,Y), _); occ(discretize(X,_),_); occ(discretize(Y,_),_).
 :- occ(splitClass(A,X,Y), _); occ(removeStopWords(X,_),_); occ(removeStopWords(Y,_),_).
+:- occ(splitClass(A,X,Y), _); occ(groupByStemp(X,_),_); occ(groupByStemp(Y,_),_).
 
 :- occ(splitClass(A,X,Y),T); not gen(X,S,F): data(S), step(F), F<T+2; not gen(Y,C,I): data(C),
 step(I), I<T+2.
@@ -426,7 +427,7 @@ sw:- occ(removeStopWords(_,_),_); knowledge(text).
 :- not sw.
 
 :- occ(removeStopWords(A,_),_); occ(removeStopWords(B,_),_); des(A,B). 
-%:- occ(groupByStem(A,_),_); occ(groupByStem(B,_),_); des(A,B). 
+:- occ(groupByStemp(A,_),_); occ(groupByStemp(B,_),_); des(A,B). 
 
 :- not ok.
 ok :- occ(signatureMining(A,B),T).

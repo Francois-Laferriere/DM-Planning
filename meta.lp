@@ -113,5 +113,8 @@ des(A,C):- des(A,B); des(B,C).
 %           occ(discretize(3,5), 3); occ(signatureMining(5,6), 4).
 %:- not clement.
 %#show erreur/4.
-#show occ/2.
+
+
+oc(A,T):- occ(A,T); A!=none.
+#show oc/2.
 %#project occ/2.
