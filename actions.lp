@@ -392,6 +392,24 @@ effect( svm(In,Out), exists(data(Out))    , true  ) :- action(svm(In,Out)).
 precond(svm(In,Out), property(struct, In ), matrix ) :- action(svm(In,Out)). 
 precond(svm(In,Out), property(type  , In ), numeric) :- action(svm(In,Out)). 
 precond(svm(In,Out), property(labeled,In ), true   ) :- action(svm(In,Out)). 
+precond(svm(In,Out), property(hasNullVal,In),false ) :- action(svm(In,Out)). 
 effect( svm(In,Out), property(struct, Out), model  ) :- action(svm(In,Out)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   Normalisation    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+action( normalize(In,Out)) :- data(In); data(Out); In<Out.
+same(normalize(In,Out1), normalize(In,Out2)) :- action(normalize(In,Out1)); action(normalize(In,Out2)).
+generate(normalize(In, Out), In, Out) :- action(normalize(In, Out)).
+
+
+
+precond(normalize(In,Out), exists(data(In))     , true  ) :- action(normalize(In,Out)). 
+precond(normalize(In,Out), exists(data(Out))    , false ) :- action(normalize(In,Out)). 
+effect(normalize(In,Out), exists(data(Out))    , true  ) :- action(normalize(In,Out)). 
+
+precond(normalize(In,Out), property(struct, In ), matrix ) :- action(normalize(In,Out)). 
+precond(normalize(In,Out), property(type  , In ), numeric) :- action(normalize(In,Out)). 
 
 

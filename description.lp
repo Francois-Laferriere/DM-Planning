@@ -138,6 +138,7 @@ occ(none, T):- occ(none,T-1); step(T).
 
 :- occ(splitClass(A,X,Y), _); occ(discretize(X,_),_); occ(discretize(Y,_),_).
 :- occ(splitClass(A,X,Y), _); occ(removeStopWords(X,_),_); occ(removeStopWords(Y,_),_).
+:- occ(splitClass(A,X,Y), _); occ(normalize(X,_),_); occ(normalize(Y,_),_).
 
 %:- occ(splitClass(A,X,Y),T); not gen(X,S,F): data(S), step(F), F<T+2; not gen(Y,C,I): data(C),
 %step(I), I<T+2.
@@ -148,6 +149,7 @@ occ(none, T):- occ(none,T-1); step(T).
 
 :- occ(removeStopWords(A,_),_); occ(removeStopWords(B,_),_); des(A,B). 
 :- occ(groupByStem(A,_),_); occ(groupByStem(B,_),_); des(A,B). 
+:- occ(normalize(A,_),_); occ(normalize(B,_),_); des(A,B). 
 
 :- occ(asserBalance(A,B),T1); not gen(B,C,T2): step(T2), data(C), T1<T2.
 :- occ(getNullVal(A,B),T1); not gen(B,C,T2): step(T2), data(C), T1<T2.
